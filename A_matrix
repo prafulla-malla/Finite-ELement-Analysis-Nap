@@ -1,5 +1,5 @@
 function A = A_matrix(Model,ElemData)
-% Coded by Prafulla Malla, Nepal. Praf_mall@hotmail.com. Currently doing Ph.D.
+% Coded by Prafulla Malla, Nepal. Praf_malla@hotmail.com. Currently doing Ph.D.
 % Kinematic matrix V=AU
 % Based upon Filippou
 % Works on Fedaslab
