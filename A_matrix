@@ -1,0 +1,30 @@
+function A = A_matrix(Model,ElemData)
+% Coded by Prafulla Malla, Nepal. Praf_mall@hotmail.com. Currently doing Ph.D.
+% Kinematic matrix V=AU
+% Based upon Filippou
+% Works on Fedaslab
+% Date 2020/05/01 during Corona virus time
+p1=length(Model.DOF(:,1)); % Dof on each node
+ne = Model.ne;                      % number of elements in structural model
+nf = Model.nf;                      % number of free dofs in structural model
+nt = Model.nt;                      % number of total dofs in structural model
+A=zeros(p1*ne,nt);                  % matrix A size 3*ne, nt
+% assemble A matrix 
+        for el=1:ne;
+        % locate element in Model and return end coordinates and id array
+        [xyz id] = Localize(Model,el);
+        % determine element length and orientation
+        [L dcx] = ElmLenOr(xyz);
+        % direction cosines of element x-axis /L
+        dXL = dcx(1)*L;dYL = dcx(2)*L;
+        ag = [-dXL/L  -dYL/L 0  dXL/L  dYL/L 0;
+            -dYL/L^2 dXL/L^2 1 dYL/L^2 -dXL/L^2 0;
+            -dYL/L^2  dXL/L^2 0 dYL/L^2 -dXL/L^2 1];
+        Ab=zeros(2*p1,nt);
+            for i=1:2*p1;
+            Ab (i,id(i,1)) = 1  ;       % Boolen compatibility matrix
+            end
+            p=[1:p1]+p1*(el-1);         % rows i to row j
+           A(p',1:nt)=A(p',1:nt)+ag*Ab;
+        end
+end
