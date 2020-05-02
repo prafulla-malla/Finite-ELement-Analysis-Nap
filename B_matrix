@@ -1,0 +1,33 @@
+function B = B_matrix(Model)
+% Coded by Prafulla Malla, Nepal. Praf_mall@hotmail.com. Currently doing Ph.D.
+% Compatibility matrix P=Bf*Q
+% extract submatrix for free dofs
+% Bf = B(1:Model.nf,:);
+% CE 220 - Theory of Structures Filippou pg 14
+% Date 2020/04/28 during Corona virus time
+p1=length(Model.DOF(:,1)); % Dof on each node
+ne = Model.ne;                     % number of elements in structural model
+nf = Model.nf;                      % number of free dofs in structural model
+nt = Model.nt;                      % number of total dofs in structural model
+nrow=nf;        
+ncol=ne*p1
+NOS = ncol-nrow;               % degree of indeterminant
+B=zeros(nt,ncol);
+% assemble B matrix 
+for el=1:ne;
+% locate element in Model and return end coordinates and id array
+[xyz id] = Localize(Model,el);
+% determine element length and orientation
+[L dcx] = ElmLenOr(xyz);
+% direction cosines of element x-axis
+dXL = dcx(1)*L;
+dYL = dcx(2)*L;
+bg = [-dXL/L -dYL/L^2 -dYL/L^2; 
+	  -dYL/L  dXL/L^2  dXL/L^2; 
+	  0         1          0;      
+	  dXL/L  dYL/L^2   dYL/L^2;
+      dYL/L -dXL/L^2   -dXL/L^2;
+        0      0             1];
+     p=[1:p1]+p1*(el-1);        		% frame 3 Dof
+    B (id,p') = B (id,p') + bg;
+end
