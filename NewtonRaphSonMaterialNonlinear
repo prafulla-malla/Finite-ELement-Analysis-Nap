@@ -48,7 +48,7 @@ message = ['Load step ' int2str(Nstep)];
 disp(message);
    dUdU=dU'*dU;UU=U'*U;
    PuPu=Pu'*Pu;PfPf=Pf'*Pf;
-while ((dUdU>Tol*UU) &(PuPu>Tol*PfPf))
+while ((dUdU>Tol*UU) &(PuPu>Tol*PfPf))   % Start iteration process
     counter=counter+1;
 V=Af*U;Va=V(1,:);Vb=V(2,:);Vc=V(3,:);Vd=V(4,:);
 epsa=Va/La;epsb=Vb/Lb;epsc=Vc/Lc;;epsd=Vd/Ld;
