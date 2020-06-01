@@ -1,0 +1,101 @@
+% Coded by Prafulla Malla, Nepal
+% @praf_malla@hotmail.com
+% 
+% None linear analysis of truss material
+%Example - Simple Truss with Nonlinear Material - NR Iterative Solution
+% Description of Truss
+% 4 members nodes 1(0,0), 2(8,0),3(0,6),4(8,6),5(0,12)
+% node 1 and 2 vertical support, node 3 and 4 horizontal support
+% load at node 4 x-dir 20, y-dir 10
+clear all;
+La=6;Lb=10;Lc=8;Ld=10;A=1;
+Af=[0 1; 0.8 0.6; 1 0; 0.8 -0.6]; Pref=[20;10];
+% property of material siga=fy*(1-exp(-alpha*epsa/epsy)); Eta=alpha*fy/epsy*exp(-alpha*epsa/epsy);
+alpha=0.5;E=10000;fy=10; epsy=fy/E;
+% initiate
+U=[0;0];lam=0.0; Dlam=0.55;
+for Nstep=1:2
+lam=lam+Dlam;
+V=Af*U;Va=V(1,:);Vb=V(2,:);Vc=V(3,:);Vd=V(4,:);      % deformation of element in local coordinae
+epsa=Va/La;epsb=Vb/Lb;epsc=Vc/Lc;;epsd=Vd/Ld;     % strain on elements
+siga=fy*(1-exp(-alpha*epsa/epsy));                                 % Calculate stress and tangent of element based upon strain on elements and material cureve
+Eta=alpha*fy/epsy*exp(-alpha*epsa/epsy);
+sigb=fy*(1-exp(-alpha*epsb/epsy));
+Etb=alpha*fy/epsy*exp(-alpha*epsb/epsy);
+sigc=fy*(1-exp(-alpha*epsc/epsy));
+Etc=alpha*fy/epsy*exp(-alpha*epsc/epsy);
+sigd=fy*(1-exp(-alpha*epsd/epsy));
+Etd=alpha*fy/epsy*exp(-alpha*epsd/epsy);
+% basic forces in element
+qa=siga*A; qb=sigb*A;qc=sigc*A;qd=sigd*A;
+% tangent stiffness
+ka=Eta*A/La; kb=Etb*A/Lb; kc=Etc*A/Lc;  kd=Etd*A/Ld;
+% resisting force 
+Q=[qa;qb;qc;qd];
+% stiffness of structure
+Ks=[ka 0 0 0;0 kb 0 0; 0 0 kc 0;0 0 0 kd];
+Pr=Af'*Q; K=Af'*Ks*Af;
+% Determine applied load for in the  step with factor lam
+Pf=lam*Pref;
+% Unbalanced force
+Pu=Pf-Pr;
+% Determine displacement correcton or increment
+dU=K\Pu;
+U=U+dU;
+Tol=1.0e-6; maxiter =10; counter=0;
+% Iterate until condition is meet
+message = ['Load step ' int2str(Nstep)];
+disp(message);
+   dUdU=dU'*dU;UU=U'*U;
+   PuPu=Pu'*Pu;PfPf=Pf'*Pf;
+while ((dUdU>Tol*UU) &(PuPu>Tol*PfPf))
+    counter=counter+1;
+V=Af*U;Va=V(1,:);Vb=V(2,:);Vc=V(3,:);Vd=V(4,:);
+epsa=Va/La;epsb=Vb/Lb;epsc=Vc/Lc;;epsd=Vd/Ld;
+siga=fy*(1-exp(-alpha*epsa/epsy));
+Eta=alpha*fy/epsy*exp(-alpha*epsa/epsy);
+sigb=fy*(1-exp(-alpha*epsb/epsy));
+Etb=alpha*fy/epsy*exp(-alpha*epsb/epsy);
+sigc=fy*(1-exp(-alpha*epsc/epsy));
+Etc=alpha*fy/epsy*exp(-alpha*epsc/epsy);
+sigd=fy*(1-exp(-alpha*epsd/epsy));
+Etd=alpha*fy/epsy*exp(-alpha*epsd/epsy);
+% basic forces
+qa=siga*A; qb=sigb*A;qc=sigc*A;qd=sigd*A;
+% tangent stiffness
+ka=Eta*A/La; kb=Etb*A/Lb; kc=Etc*A/Lc;  kd=Etd*A/Ld;
+% resisting force 
+Q=[qa;qb;qc;qd];
+% stiffness of structure
+Ks=[ka 0 0 0;0 kb 0 0; 0 0 kc 0;0 0 0 kd];
+Pr=Af'*Q; K=Af'*Ks*Af;
+% Unbalanced force
+Pu=Pf-Pr;
+% Determine displacement correcton or increment
+dU=linsolve(K,Pu);
+U=U+dU;
+dUdU=dU'*dU;UU=U'*U;error=dUdU>Tol*UU;
+PuPu=Pu'*Pu;PfPf=Pf'*Pf;;error2=PuPu>Tol*PfPf;
+    if counter>maxiter
+        message = ['Number of iterations exceeded. Stop the program. Iterations = ' int2str(counter)];
+        disp(message);
+        return
+    end
+end
+    
+   message = ['convergence after ' int2str(counter) ' iterations'];
+   disp(message);
+    message = ['the equilibrium error is ' num2str(error)];
+   disp(message);
+   disp(Pu)
+   format short e
+   message = ['the Displacement solution is ' ];
+   disp(message);
+   disp(U)
+   message = ['the Applied force is ' ];
+   disp(message);
+   disp(Pf);
+   disp ('Forces in element ' );
+   disp(Q);
+  
+end
