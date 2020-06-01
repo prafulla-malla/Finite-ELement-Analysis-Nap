@@ -1,5 +1,6 @@
 function A = A_matrix(Model,ElemData)
 % Coded by Prafulla Malla, Nepal. Praf_malla@hotmail.com. Currently doing Ph.D.
+% Only for beam element, not for truss
 % Kinematic matrix V=AU
 % Based upon Filippou
 % Works on Fedaslab
